@@ -1,5 +1,6 @@
-{"homepage": "https://jepoy92.github.io/facebook-messenger/",
+{
   "name": "facebook-messenger",
+  "homepage": "https://jepoy92.github.io/facebook-messenger/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
