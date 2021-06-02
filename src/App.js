@@ -1,15 +1,15 @@
-import React from 'react'
+import React, { useState } from 'react'
 import './App.css';
 
 import firebase from 'firebase/app';
-import 'firebase/firestore';
+import 'firebase/firestore/';
 import 'firebase/auth';
 import 'firebase/analytics';
 
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 
-firebase.initializeApp({
+const config = {
   apiKey: "AIzaSyAgSHQaZj7Efrk7JyZpKpACrzyn_KIHnt8",
   authDomain: "facebook-messenger-3e5f3.firebaseapp.com",
   projectId: "facebook-messenger-3e5f3",
@@ -17,7 +17,9 @@ firebase.initializeApp({
   messagingSenderId: "811199670485",
   appId: "1:811199670485:web:a33121fd362c617c901a5c",
   measurementId: "G-99PPM2WJL1"
-})
+}
+
+firebase.initializeApp(config)
 
 const auth = firebase.auth();
 const firestore = firebase.firestore();
@@ -68,13 +70,31 @@ function SignOut(){
 function ChatRoom() {
 
   // references a firestore collection. This is so the collection of messages appear in the app.
-  const messageRef = firestore.collection('messages');
+  const messagesRef = firestore.collection('messages');
   // Queries for the messages made by users in the chat and lists them by timestamp.
-  const query = messageRef.orderBy('createdAt').limit(25);
+  const query = messagesRef.orderBy('createdAt').limit(25);
   // listens for updates to collection in real time using the useCollectionData as a data hook. 
   // This returns each object where each object is a message that has been uploaded into the data base.
   const [messages] = useCollectionData(query, {idField: 'id'});
   
+  const [formValue, setFormValue] = useState('');
+
+  const sendMessage = async(e) => {
+
+    e.preventDefault();
+
+    const { uid, photoURL } = auth.currentUser;
+    
+    await messagesRef.add({
+      text: formValue,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      uid,
+      photoURL
+    });
+
+    setFormValue('');
+  }
+
   return (
     <>
       <div>
@@ -82,9 +102,13 @@ function ChatRoom() {
         {messages && messages.map(msg => <ChatMessage key={msg.id} message={msg}/>)}
       </div>
 
-      <div>
+      <form onSubmit={sendMessage}>
 
-      </div>
+        <input value={formValue} onChange={(e) => setFormValue(e.target.value)}/>
+
+        <button type="submit">🕊️</button>
+
+      </form>
       
     </>
   )
@@ -93,9 +117,16 @@ function ChatRoom() {
 
 function ChatMessage(props) {
 // Shows text in chat by accessing 
-  const { text, uid } = props.message;
+  const { text, uid, photoURL } = props.message;
 
-  return <p>{text}</p>
+  const messageClass = uid === auth.currentUser.uid ? 'sent' : 'received'
+  
+  return (
+  <div className={`message ${messageClass}`}>
+    <p>{text}</p>
+  </div>
+
+  )
 }
 
 export default App;
