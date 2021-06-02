@@ -1,4 +1,4 @@
-import logo from './logo.svg';
+import React from 'react'
 import './App.css';
 
 import firebase from 'firebase/app';
@@ -24,6 +24,9 @@ const firestore = firebase.firestore();
 const analytics = firebase.analytics();
 
 function App() {
+
+  const [user] = useAuthState(auth);
+
   return (
     <div className="App">
       <header className="App-header">
@@ -31,7 +34,7 @@ function App() {
       </header>
 
       <section>
-        {use ? <ChatRoom /> : <SignIn />}
+        {user ? <ChatRoom /> : <SignIn />}
       </section>
 
 
@@ -39,6 +42,7 @@ function App() {
   );
 }
 
+// When triggered, asks user to authenticate account with their pre-existing google account to sign in.
 function SignIn(){
 
   const signInWithGoogle = () => {
@@ -51,11 +55,47 @@ function SignIn(){
   )
 }
 
+// When triggered, signs out of user account.
+
 function SignOut(){
   return auth.currentUser && (
 
     <button onClick={() => auth.signOut()}>Sign Out</button>
   )
+}
+
+// Stores messages
+function ChatRoom() {
+
+  // references a firestore collection. This is so the collection of messages appear in the app.
+  const messageRef = firestore.collection('messages');
+  // Queries for the messages made by users in the chat and lists them by timestamp.
+  const query = messageRef.orderBy('createdAt').limit(25);
+  // listens for updates to collection in real time using the useCollectionData as a data hook. 
+  // This returns each object where each object is a message that has been uploaded into the data base.
+  const [messages] = useCollectionData(query, {idField: 'id'});
+  
+  return (
+    <>
+      <div>
+        {/* Maps over the array of messages to render each chat bubble */}
+        {messages && messages.map(msg => <ChatMessage key={msg.id} message={msg}/>)}
+      </div>
+
+      <div>
+
+      </div>
+      
+    </>
+  )
+
+}
+
+function ChatMessage(props) {
+// Shows text in chat by accessing 
+  const { text, uid } = props.message;
+
+  return <p>{text}</p>
 }
 
 export default App;
