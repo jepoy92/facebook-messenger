@@ -68,9 +68,9 @@ function SignOut(){
 function ChatRoom() {
 
   // references a firestore collection. This is so the collection of messages appear in the app.
-  const messageRef = firestore.collection('messages');
+  const messagesRef = firestore.collection('messages');
   // Queries for the messages made by users in the chat and lists them by timestamp.
-  const query = messageRef.orderBy('createdAt').limit(25);
+  const query = messagesRef.orderBy('createdAt').limit(25);
   // listens for updates to collection in real time using the useCollectionData as a data hook. 
   // This returns each object where each object is a message that has been uploaded into the data base.
   const [messages] = useCollectionData(query, {idField: 'id'});
