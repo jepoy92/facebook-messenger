@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import './App.css';
 
 import firebase from 'firebase/app';
@@ -67,6 +67,8 @@ function SignOut(){
 // Stores messages
 function ChatRoom() {
 
+  const dummy = useRef()
+
   // references a firestore collection. This is so the collection of messages appear in the app.
   const messagesRef = firestore.collection('messages');
   // Queries for the messages made by users in the chat and lists them by timestamp.
@@ -91,14 +93,18 @@ function ChatRoom() {
     });
 
     setFormValue('');
+
+    dummy.current.scrollIntoView({ behavior: 'smooth' })
   }
 
   return (
     <>
-      <div>
+      <main>
         {/* Maps over the array of messages to render each chat bubble */}
         {messages && messages.map(msg => <ChatMessage key={msg.id} message={msg}/>)}
-      </div>
+
+        <div ref={dummy}></div>
+      </main>
 
       <form onSubmit={sendMessage}>
 
